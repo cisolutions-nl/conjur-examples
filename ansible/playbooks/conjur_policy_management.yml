@@ -1,0 +1,61 @@
+---
+- name: Replace Conjur Team Policy
+  hosts: all
+  environment:
+    CONJUR_APPLIANCE_URL: "{{ CONJUR_APPLIANCE_URL }}"
+    CONJUR_ACCOUNT: "{{ CONJUR_ACCOUNT }}"
+    CONJUR_AUTHN_LOGIN: "{{ CONJUR_USERNAME }}"
+    CONJUR_AUTHN_API_KEY: "{{ CONJUR_SECRET }}"
+  tasks:
+    - name: Copy Conjur cybr CLI executable to /tmp/
+      ansible.builtin.copy:
+        src: "../../../lib/cybr-cli_1.0.1-release_linux_amd64.tar.gz"
+        dest: "/tmp/"
+        mode: "644"
+
+    - name: Untar Conjur cybr CLI
+      ansible.builtin.command: tar -xvf /tmp/cybr-cli_1.0.1-release_linux_amd64.tar.gz -C /tmp/
+
+    - name: Check version of Conjur cybr CLI
+      ansible.builtin.shell:
+        chdir: /tmp/
+        cmd: ./cybr version
+
+    - block:
+        - name: Initialize Conjur cybr CLI
+          ansible.builtin.shell:
+            chdir: /tmp/
+            cmd: ./cybr conjur logon-non-interactive
+
+        - name: Check Conjur authentication
+          ansible.builtin.shell:
+            chdir: /tmp/
+            cmd: ./cybr conjur whoami
+
+        - name: Conjur list
+          ansible.builtin.shell:
+            chdir: /tmp/
+            cmd: ./cybr conjur list
+
+        - name: Remove policies directory in /tmp/conjur/
+          ansible.builtin.shell:
+            cmd: rm -rf /tmp/conjur/policies/
+
+        - name: Copy team policy files
+          ansible.builtin.copy:
+            src: "../../../policies/"
+            dest: "/tmp/conjur/policies/"
+            mode: "644"
+
+        - name: Create full temporary team policy file
+          ansible.builtin.shell:
+            cmd: cat /tmp/conjur/policies/team/* > /tmp/conjur/policies/team.policy.temp.yml
+
+        - name: Replace team policy
+          ansible.builtin.shell:
+            cmd: ./cybr conjur replace-policy -b "{{ CONJUR_BRANCH_NAME }}" -f "/tmp/conjur/policies/team.policy.temp.yml"  # yamllint disable-line rule:line-length
+
+        - name: Conjur list
+          ansible.builtin.shell:
+            chdir: /tmp/
+            cmd: ./cybr conjur list

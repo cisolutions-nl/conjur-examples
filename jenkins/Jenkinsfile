@@ -1,0 +1,70 @@
+pipeline {
+    agent {
+        node {
+            label 'proxnuccis1'
+        }
+    }
+    stages {
+        stage('Install the cybr-cli') {
+            steps {
+                script {
+                    sh "tar -xzf lib/cybr-cli_1.0.1-release_linux_amd64.tar.gz"
+                    sh "chmod +x cybr"
+                }
+                sh "./cybr version"
+            }
+        }
+        stage('Authenticate with the cybr-cli') {
+            steps {
+                withCredentials([
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_USERNAME', variable: 'CONJUR_AUTHN_LOGIN'),
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_PASSWORD', variable: 'CONJUR_AUTHN_API_KEY')
+                ]) {
+                    script {
+                        def CONJUR_APPLIANCE_URL = params.CONJUR_APPLIANCE_URL
+                        def CONJUR_ACCOUNT = params.CONJUR_ACCOUNT
+                        sh "./cybr conjur logon-non-interactive"
+                    }
+                }
+            }
+        }
+        stage('Check Conjur authentication') {
+            steps {
+                withCredentials([
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_USERNAME', variable: 'CONJUR_AUTHN_LOGIN'),
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_PASSWORD', variable: 'CONJUR_AUTHN_API_KEY')
+                ]) {
+                    script {
+                        sh "./cybr conjur whoami"
+                    }
+                }
+            }
+        }
+        stage('Load Conjur Root Policy') {
+            steps {
+                withCredentials([
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_USERNAME', variable: 'CONJUR_AUTHN_LOGIN'),
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_PASSWORD', variable: 'CONJUR_AUTHN_API_KEY')
+                ]) {
+                    script {
+                        sh "cat policies/root.yml policies/root/* > root.temp.yml"
+                        sh "./cybr conjur replace-policy -b root -f root.temp.yml"
+                        sh "rm root.temp.yml"
+                    }
+                }
+            }
+        }
+        stage('List Conjur resources') {
+            steps {
+                withCredentials([
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_USERNAME', variable: 'CONJUR_AUTHN_LOGIN'),
+                    conjurSecretCredential(credentialsId: 'CONJUR_ADMIN_PASSWORD', variable: 'CONJUR_AUTHN_API_KEY')
+                ]) {
+                    script {
+                        sh "./cybr conjur list"
+                    }
+                }
+            }
+        }
+    }
+}

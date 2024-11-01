@@ -1,0 +1,105 @@
+---
+- name: Check server health status
+  hosts: all
+  vars:
+    health_url: https://{{ cluster }}/health
+  tasks:
+    - name: Check health page on master
+      uri:
+        url: "{{ health_url }}"
+        method: GET
+        validate_certs: false
+        status_code: 200
+      register: response
+
+
+    - name: Set variables with the response content
+      set_fact:
+        role: "{{ response.json.role }}"
+        cluster_ok: "{{ response.json.cluster.ok }}"
+        cluster_degraded: "{{ response.json.cluster.degraded }}"
+        cluster_status: "{{ response.json.cluster.status }}"
+        service_ui: "{{ response.json.services.ui }}"
+        service_ok: "{{ response.json.services.ok }}"
+        database_ok: "{{ response.json.database.ok }}"
+        audit_ok: "{{ response.json.audit.ok }}"
+
+    - name: Check if the role is master
+      debug:
+        msg: "{{ cluster }} is master"
+      when: role == "master"
+
+    - name: Display message for master not found
+      fail:
+        msg: "Master niet gevonden op {{ cluster }}"
+      when: role != "master"
+
+    - name: Check if the cluster is ok
+      debug:
+        msg: "Cluster is ok"
+      when: cluster_ok == true
+
+    - name: Check if the cluster is not ok
+      fail:
+        msg: "Cluster is not ok"
+      when: cluster_ok != true
+
+    - name: Check if cluster is not degraded
+      debug:
+        msg: "Cluster is not degraded"
+      when: cluster_degraded == false
+
+    - name: Check if cluster is degraded
+      fail:
+        msg: "Cluster is degraded"
+      when: cluster_degraded != false
+
+    - name: Check if cluster status is running
+      debug:
+        msg: "Cluster status is running"
+      when: cluster_status == "running"
+
+    - name: Check if cluster status is not running
+      fail:
+        msg: "Cluster status is not running"
+      when: cluster_status != "running"
+
+    - name: Check if UI is ok
+      debug:
+        msg: "Cluster UI is OK"
+      when: service_ui == "ok"
+
+    - name: Check if UI is not ok
+      fail:
+        msg: "Cluster UI is not OK"
+      when: service_ui != "ok"
+
+    - name: Check if service is ok
+      debug:
+        msg: "Service is OK"
+      when: service_ok == true
+
+    - name: Check if service is not ok
+      fail:
+        msg: "Service is not OK"
+      when: service_ok != true
+
+    - name: Check if database is ok
+      debug:
+        msg: "Database is OK"
+      when: database_ok == true
+
+    - name: Check if database is not ok
+      fail:
+        msg: "Database is not OK"
+      when: database_ok != true
+
+    - name: Check if audit is ok
+      debug:
+        msg: "Audit is OK"
+      when: audit_ok == true
+
+    - name: Check if audit is not ok
+      fail:
+        msg: "Audit is not OK"
+      when: audit_ok != true
