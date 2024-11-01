@@ -29,7 +29,7 @@
 
 - !permit
   role: !layer namespace-2
-  resource: *global-variables
+  resource: *global-variables  # yamllint disable rule:anchors
   privileges: [read, execute]
 
 - !permit

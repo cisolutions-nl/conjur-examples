@@ -36,7 +36,7 @@
 
 - !permit
   role: !layer namespace-a
-  resource: *global-variables
+  resource: *global-variables  # yamllint disable rule:anchors
   privileges: [read, execute]
 
 - !permit
