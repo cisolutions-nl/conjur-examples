@@ -1,0 +1,31 @@
+### Namespace: openshift-jwt-eso-dev-team-a / Service account: jwt-eso-service-account-dev-team-a ###
+- !host
+  # The host that is used in OpenShift to read secrets from Conjur;
+  id: system:serviceaccount:devteama:jwt-eso-service-account-devteama
+  annotations:
+    authn-jwt/Conjur_OpenShift_MainJWT_O/sub: system:serviceaccount:devteama:jwt-eso-service-account-devteama  # yamllint disable-line rule:line-length
+    openshift: true
+
+- !grant  # Members of this layer (created by root policy) can authenticate through JWT;
+  role: !layer jwt-consumers
+  member: !host system:serviceaccount:devteama:jwt-eso-service-account-devteama
+
+# Variables;
+- !variable
+  id: nexus-api-key
+  annotations:
+    openshift: true
+
+# Layers;
+- !layer namespace-DevTeamA
+
+# Grants/Permits;
+- !grant
+  role: !layer namespace-DevTeamA
+  members:
+    - !host system:serviceaccount:devteama:jwt-eso-service-account-devteama
+
+- !permit
+  role: !layer namespace-DevTeamA
+  resource: !variable nexus-api-key
+  privileges: [read, execute]

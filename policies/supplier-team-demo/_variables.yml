@@ -1,0 +1,9 @@
+- &global-variables
+  - !variable
+    id: gitlab-container-registery-token
+    annotations:
+      openshift: true
+  - !variable
+    id: nexus-api-key
+    annotations:
+      openshift: true

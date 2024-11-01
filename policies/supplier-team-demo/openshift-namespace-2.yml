@@ -1,0 +1,43 @@
+# Variables;
+- &variables-namespace-2
+  - !variable
+    id: hr-api-url
+    annotations:
+      openshift: true
+  - !variable
+    id: hr-api-key
+    annotations:
+      openshift: true
+
+# Hosts;
+- !host
+  # The host that is used in OpenShift to read secrets from Conjur;
+  id: system:serviceaccount:conjur-namespace-2:jwt-eso-service-account-conjur-namespace-2
+  annotations:
+    authn-jwt/Conjur_TeamA_OpenShift/sub: system:serviceaccount:conjur-namespace-2:jwt-eso-service-account-conjur-namespace-2  # yamllint disable-line rule:line-length
+    openshift: true
+
+# Layers;
+- !layer namespace-2
+
+# Grants/Permits;
+- !grant
+  role: !layer namespace-2
+  members:
+    - !host system:serviceaccount:conjur-namespace-2:jwt-eso-service-account-conjur-namespace-2
+    - !host app-2
+
+- !permit
+  role: !layer namespace-2
+  resource: *global-variables
+  privileges: [read, execute]
+
+- !permit
+  role: !layer namespace-2
+  resource: *variables-namespace-2
+  privileges: [read, execute]
+
+- !grant
+  role: !layer jwt-consumers
+  members:
+    - !host system:serviceaccount:conjur-namespace-2:jwt-eso-service-account-conjur-namespace-2
