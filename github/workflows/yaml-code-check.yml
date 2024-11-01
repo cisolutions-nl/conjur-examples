@@ -1,15 +1,14 @@
 ---
-name: CICD Pipeline
+name: Code checks
 on: [push]  # yamllint disable rule:truthy
 jobs:
 
   # Yaml code checks
-on: push  # yamllint disable-line rule:truthy
-jobs:
   yaml-lint:
+    name: Run yamllint
     runs-on: ubuntu-latest
     steps:
       - name: Check out code from GitHub
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run yamllint
         run: yamllint .
