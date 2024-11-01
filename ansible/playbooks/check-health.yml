@@ -1,10 +1,10 @@
 ---
-- name: Check server health status
+- name: Check Conjur server health status
   hosts: all
   vars:
     health_url: https://{{ cluster }}/health
   tasks:
-    - name: Check health page on master
+    - name: Check Conjur health page on master
       uri:
         url: "{{ health_url }}"
         method: GET
