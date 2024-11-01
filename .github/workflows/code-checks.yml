@@ -1,0 +1,72 @@
+---
+name: Code checks
+on: [push]  # noqa yaml[truthy]
+jobs:
+
+  # Yaml code checks
+  yaml-lint:
+    name: Run yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v4
+      - name: Run yamllint
+        run: yamllint .
+
+  # Python code checks
+  black:
+    name: Run black
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: psf/black@stable
+  bandit:
+    name: Run bandit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run Bandit
+        uses: jpetrucciani/bandit-check@main
+        with:
+          path: '.'
+  isort:
+    name: Run isort
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - uses: isort/isort-action@master
+        with:
+          configuration: "--check-only --diff --profile black"
+  flake8:
+    name: Run flake8
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v4
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run flake8
+        uses: py-actions/flake8@v2
+
+  # Python security checks
+  safety:
+    name: Run safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: davidslusser/actions_python_safety@v1.0.2
+        with:
+          options: '--ignore=70612'
+
+  # Radon code checks
+  radon:
+    name: Run radon
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: davidslusser/actions_python_radon@v1.0.0

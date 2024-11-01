@@ -7,7 +7,7 @@ on:  # yamllint disable-line rule:truthy
 
 jobs:
   trigger-conjur-policy-load:
-    runs-on: proxnuccisp10
+    runs-on: runnerxyz
     steps:
       - name: Import Secrets using CyberArk Conjur Secret Fetcher Action  # yamllint disable-line rule:line-length
         uses: cisolutions-nl/conjur-action@v0.1

@@ -4,8 +4,6 @@ on: [push]  # noqa yaml[truthy]
 jobs:
 
   # Yaml code checks
-on: push  # yamllint disable-line rule:truthy
-jobs:
   yaml-lint:
     runs-on: ubuntu-latest
     steps:
