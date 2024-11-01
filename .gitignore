@@ -1,0 +1,12 @@
+# Conjur specific files
+.ash_history
+.conjurrc
+.netrc
+
+
+# Certificates
+*pem
+
+.idea/
+
+*.temp.yml

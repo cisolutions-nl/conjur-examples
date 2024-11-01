@@ -1,0 +1,50 @@
+# Variables;
+- &variables-namespace-1
+  - !variable
+    id: database-host
+    annotations:
+      openshift: true
+  - !variable
+    id: database-name
+    annotations:
+      openshift: true
+  - !variable
+    id: database-user
+    annotations:
+      openshift: true
+  - !variable
+    id: database-password
+    annotations:
+      openshift: true
+
+# Hosts;
+- !host
+  # The host that is used in OpenShift to read secrets from Conjur;
+  id: system:serviceaccount:conjur-namespace-1:jwt-eso-service-account-conjur-namespace-1
+  annotations:
+    authn-jwt/Conjur_TeamA_OpenShift/sub: system:serviceaccount:conjur-namespace-1:jwt-eso-service-account-conjur-namespace-1  # yamllint disable-line rule:line-length
+    openshift: true
+
+# Layers;
+- !layer namespace-1
+
+# Grants/Permits;
+- !grant
+  role: !layer namespace-1
+  members:
+    - !host system:serviceaccount:conjur-namespace-1:jwt-eso-service-account-conjur-namespace-1
+
+- !permit
+  role: !layer namespace-a
+  resource: *global-variables  # yamllint disable rule:anchors
+  privileges: [read, execute]
+
+- !permit
+  role: !layer namespace-a
+  resource: *variables-namespace-1
+  privileges: [read, execute]
+
+- !grant
+  role: !layer jwt-consumers
+  members:
+    - !host system:serviceaccount:conjur-namespace-1:jwt-eso-service-account-conjur-namespace-1
