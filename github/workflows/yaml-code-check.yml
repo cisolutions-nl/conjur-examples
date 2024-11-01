@@ -1,6 +1,6 @@
 ---
 name: CICD Pipeline
-on: [push]  # noqa yaml[truthy]
+on: [push]  # yamllint disable rule:truthy
 jobs:
 
   # Yaml code checks
